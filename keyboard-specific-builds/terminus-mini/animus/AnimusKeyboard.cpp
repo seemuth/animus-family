@@ -125,6 +125,7 @@ Keyboard_::Keyboard_(void)
 {
   static HIDSubDescriptor node(_hidReportDescriptor, sizeof(_hidReportDescriptor));
   HID().AppendDescriptor(&node);
+  _keyRollOver = KRO_NKRO_WIN;
 }
 
 void Keyboard_::begin(void)
@@ -294,6 +295,13 @@ size_t Keyboard_::press(uint8_t k)
   else if (k >= 128)            // it's a modifier key
   {
     _keyReport1.modifiers |= (1<<(k-128));
+
+    if (_keyRollOver == KRO_NKRO_LIN)
+    {
+      _keyReport2.modifiers |= (1<<(k-128));
+      _keyReport3.modifiers |= (1<<(k-128));
+    }
+
     k = 0;
   }
   else                                    // it's a printing key
@@ -326,7 +334,7 @@ size_t Keyboard_::press(uint8_t k)
         break;
       }
     }
-    if (i == 6)
+    if ((i == 6) && (_keyRollOver != KRO_6KRO))
     {
       // start of second board check
       if (_keyReport2.keys[0] != k && _keyReport2.keys[1] != k &&
@@ -373,8 +381,13 @@ size_t Keyboard_::press(uint8_t k)
     }
   }
   sendReport(&_keyReport1, 2);
-  sendReport(&_keyReport2, 3);
-  sendReport(&_keyReport3, 4);
+
+  if (_keyRollOver != KRO_6KRO)
+  {
+    sendReport(&_keyReport2, 3);
+    sendReport(&_keyReport3, 4);
+  }
+
   return 1;
 }
 
@@ -391,6 +404,13 @@ size_t Keyboard_::release(uint8_t k)
   else if (k >= 128)            // it's a modifier key
   {
     _keyReport1.modifiers &= ~(1<<(k-128));
+
+    if (_keyRollOver == KRO_NKRO_LIN)
+    {
+      _keyReport2.modifiers &= ~(1<<(k-128));
+      _keyReport3.modifiers &= ~(1<<(k-128));
+    }
+
     k = 0;
   }
   else                                    // it's a printing key
@@ -409,6 +429,7 @@ size_t Keyboard_::release(uint8_t k)
 
   // Test the key report to see if k is present.  Clear it if it exists.
   // Check all positions in case the key is present more than once (which it shouldn't be)
+  // Note re: NKRO: it is OK to clear keys in NKRO KeyReports even if in 6KRO mode.
   for (i=0; i<6; i++)
   {
     if (0 != k && _keyReport1.keys[i] == k)
@@ -426,8 +447,13 @@ size_t Keyboard_::release(uint8_t k)
   }
 
   sendReport(&_keyReport1, 2);
-  sendReport(&_keyReport2, 3);
-  sendReport(&_keyReport3, 4);
+
+  if (_keyRollOver != KRO_6KRO)
+  {
+    sendReport(&_keyReport2, 3);
+    sendReport(&_keyReport3, 4);
+  }
+
   return 1;
 }
 

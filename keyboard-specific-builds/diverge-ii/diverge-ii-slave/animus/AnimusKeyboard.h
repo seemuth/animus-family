@@ -79,6 +79,13 @@ typedef struct
   uint8_t keys[6];
 } KeyReport;
 
+enum KeyRollOver
+{
+  KRO_6KRO = 0,
+  KRO_NKRO_WIN = 1,
+  KRO_NKRO_LIN = 2,
+};
+
 class Keyboard_ : public Print
 {
 private:
@@ -88,6 +95,8 @@ private:
 
   void sendReport(KeyReport* keys, uint8_t ID);
 public:
+  KeyRollOver _keyRollOver;
+
   Keyboard_(void);
   void begin(void);
   void end(void);

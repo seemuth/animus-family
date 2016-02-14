@@ -126,6 +126,37 @@ void pressKey(char val, byte type)
       }
       releaseAllKey();
     }
+    else if (type == 6)
+    {
+      if (val == 0)
+      {
+        Keyboard._keyRollOver = KRO_6KRO;
+      }
+      else if (val == 1)
+      {
+        /* Toggle between 6KRO and NKRO (Win). */
+        if (Keyboard._keyRollOver == KRO_6KRO)
+        {
+          Keyboard._keyRollOver = KRO_NKRO_WIN;
+        }
+        else
+        {
+          Keyboard._keyRollOver = KRO_6KRO;
+        }
+      }
+      else if (val == 2)
+      {
+        /* Toggle between 6KRO and NKRO (Lin). */
+        if (Keyboard._keyRollOver == KRO_6KRO)
+        {
+          Keyboard._keyRollOver = KRO_NKRO_LIN;
+        }
+        else
+        {
+          Keyboard._keyRollOver = KRO_6KRO;
+        }
+      }
+    }
   }
 
   modKeyDown(val, type);
